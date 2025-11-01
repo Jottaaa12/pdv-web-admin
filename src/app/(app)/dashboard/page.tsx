@@ -99,7 +99,7 @@ export default function DashboardPage() {
         {/* Card Faturamento */}
         <KpiCard
           title="Faturamento Total (Hoje)"
-          value={formatCurrency(kpis?.total_faturamento)}
+          value={formatCurrency(kpis?.total_faturamento ?? null)}
           icon="💰"
         />
         {/* Card Vendas */}
@@ -111,7 +111,7 @@ export default function DashboardPage() {
         {/* Card Ticket Médio */}
         <KpiCard
           title="Ticket Médio (Hoje)"
-          value={formatCurrency(kpis?.ticket_medio)}
+          value={formatCurrency(kpis?.ticket_medio ?? null)}
           icon="📊"
         />
       </div>
