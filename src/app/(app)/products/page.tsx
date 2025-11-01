@@ -256,12 +256,11 @@ function ProductForm({ product, groups, onClose }: ProductFormProps) {
       if (product) {
         // --- UPDATE ---
         // Removemos campos que não devem ser atualizados (stock/quantity)
-        delete payload.stock;
-        delete payload.quantity;
+        const { stock, quantity, ...dataToSend } = payload;
 
         const { error } = await supabase
           .from("products")
-          .update(payload)
+          .update(dataToSend)
           .eq("id", product.id);
         rpcError = error;
       } else {
