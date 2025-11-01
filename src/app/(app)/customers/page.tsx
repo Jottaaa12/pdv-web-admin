@@ -178,7 +178,7 @@ function CustomerForm({ customer, onClose }: CustomerFormProps) {
     cpf: customer?.cpf || "",
     phone: customer?.phone || "",
     address: customer?.address || "",
-    credit_limit: customer ? (customer.credit_limit / 100).toFixed(2).replace(".", ",") : "0,00",
+    credit_limit: customer ? ((customer.credit_limit || 0) / 100).toFixed(2).replace(".", ",") : "0,00",
     is_blocked: customer?.is_blocked || false,
   });
   const [loading, setLoading] = useState(false);
