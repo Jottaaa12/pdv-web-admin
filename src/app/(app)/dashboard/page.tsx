@@ -105,7 +105,7 @@ export default function DashboardPage() {
         {/* Card Vendas */}
         <KpiCard
           title="Total de Vendas (Hoje)"
-          value={kpis?.total_vendas.toString() || '0'}
+          value={(kpis?.total_vendas ?? 0).toString()}
           icon="🛒"
         />
         {/* Card Ticket Médio */}

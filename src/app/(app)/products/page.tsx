@@ -165,7 +165,7 @@ export default function ProductsPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.description}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.product_groups?.name || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.barcode || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{/*formatCurrency(product.price)*/}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCurrency(product.price)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.sale_type === 'unit' ? 'Unidade' : 'Peso'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
                   <button
@@ -203,6 +203,7 @@ type ProductFormData = {
   description: string;
   barcode: string;
   price: string; // Preço em R$ (ex: "10,50")
+  stock: string; // Estoque como string
   sale_type: 'unit' | 'weight';
   group_id: string; // ID do grupo como string
 };
@@ -214,6 +215,7 @@ function ProductForm({ product, groups, onClose }: ProductFormProps) {
     barcode: product?.barcode || "",
     // Formata centavos para R$
     price: product ? (product.price / 100).toFixed(2).replace(".", ",") : "0,00",
+    stock: product?.stock?.toString() || "0",
     sale_type: product?.sale_type || "unit",
     group_id: product?.group_id?.toString() || "",
   });
@@ -235,32 +237,31 @@ function ProductForm({ product, groups, onClose }: ProductFormProps) {
 
       // Converte preço (ex: "10,50") para centavos (ex: 1050)
       const priceInCents = Math.round(parseFloat(formData.price.replace(".", "").replace(",", ".")) * 100);
+      const stockAmount = parseInt(formData.stock, 10);
 
       if (isNaN(priceInCents)) {
         throw new Error("Formato de preço inválido. Use 10,50.");
+      }
+      if (isNaN(stockAmount)) {
+        throw new Error("O estoque deve ser um número válido.");
       }
 
       const payload: Database['public']['Tables']['products']['Insert'] = {
         description: formData.description,
         barcode: formData.barcode || null,
         price: priceInCents,
+        stock: stockAmount,
         sale_type: formData.sale_type,
         group_id: formData.group_id ? parseInt(formData.group_id) : null,
-        // Valores padrão (ajuste conforme seu schema)
-        stock: 0, 
-        quantity: 0,
       };
 
       let rpcError;
 
       if (product) {
         // --- UPDATE ---
-        // Removemos campos que não devem ser atualizados (stock/quantity)
-        const { stock, quantity, ...dataToSend } = payload;
-
         const { error } = await supabase
           .from("products")
-          .update(dataToSend)
+          .update(payload)
           .eq("id", product.id);
         rpcError = error;
       } else {
@@ -311,6 +312,20 @@ function ProductForm({ product, groups, onClose }: ProductFormProps) {
             name="price"
             id="price"
             value={formData.price}
+            onChange={handleChange}
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900"
+          />
+        </div>
+
+        {/* Campo Estoque */}
+        <div className="mb-4">
+          <label htmlFor="stock" className="block text-sm font-medium text-gray-700">Estoque Atual</label>
+          <input
+            type="number"
+            name="stock"
+            id="stock"
+            value={formData.stock}
             onChange={handleChange}
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900"
